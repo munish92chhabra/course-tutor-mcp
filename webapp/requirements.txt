@@ -1,0 +1,13 @@
+# Web app for the class. The MCP server does not need these.
+# Install with:  pip install -r webapp/requirements.txt
+
+fastapi>=0.110
+uvicorn[standard]>=0.27
+anthropic>=0.40
+itsdangerous>=2.1      # signs the session cookie
+python-dotenv>=1.0     # reads webapp/.env so you don't retype your key
+pypdf>=5.0             # reading PDF course material
+
+# Testing
+pytest>=8.0
+httpx>=0.27            # required by fastapi's TestClient

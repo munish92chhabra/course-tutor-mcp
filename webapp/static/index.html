@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Course Tutor</title>
+<style>
+  :root {
+    --ink: #1a1a18;
+    --ink-soft: #595751;
+    --ink-faint: #8a8781;
+    --paper: #faf8f4;
+    --card: #ffffff;
+    --rule: #e4e0d8;
+    --accent: #7a4f2c;
+    --accent-soft: #f3ece3;
+    --warn-bg: #fdf3e7;
+    --warn-ink: #8a5a1f;
+    --radius: 12px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #ece9e3;
+      --ink-soft: #a9a59d;
+      --ink-faint: #7d7a73;
+      --paper: #16161a;
+      --card: #1e1e22;
+      --rule: #32323a;
+      --accent: #d9a877;
+      --accent-soft: #2a2520;
+      --warn-bg: #2b2318;
+      --warn-ink: #e0b57f;
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 44rem;
+    margin: 0 auto;
+    padding: 1.5rem 1.1rem 6rem;
+  }
+
+  header { padding: 1rem 0 1.4rem; border-bottom: 1px solid var(--rule); margin-bottom: 1.4rem; }
+  h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.65rem;
+    font-weight: 600;
+    margin: 0 0 .3rem;
+    letter-spacing: -.01em;
+  }
+  .sub { color: var(--ink-soft); font-size: .92rem; margin: 0; }
+
+  .topics { margin-top: .9rem; display: flex; flex-wrap: wrap; gap: .35rem; }
+  .chip {
+    font-size: .76rem;
+    padding: .2rem .55rem;
+    border-radius: 100px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid transparent;
+  }
+
+  /* --- login --- */
+  .gate { max-width: 23rem; margin: 3.5rem auto; text-align: center; }
+  .gate p { color: var(--ink-soft); font-size: .92rem; }
+
+  input[type=password], textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: .7rem .85rem;
+    outline: none;
+    resize: none;
+  }
+  input[type=password]:focus, textarea:focus { border-color: var(--accent); }
+
+  button {
+    font: inherit;
+    font-weight: 500;
+    color: var(--paper);
+    background: var(--ink);
+    border: 0;
+    border-radius: var(--radius);
+    padding: .65rem 1.1rem;
+    cursor: pointer;
+  }
+  button:disabled { opacity: .45; cursor: default; }
+  button.ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--rule);
+    padding: .35rem .7rem;
+    font-size: .82rem;
+    font-weight: 400;
+  }
+
+  /* --- conversation --- */
+  .turn { margin-bottom: 1.8rem; }
+  .q {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.08rem;
+    line-height: 1.45;
+    padding-left: .85rem;
+    border-left: 3px solid var(--accent);
+    margin-bottom: .95rem;
+  }
+  .a { white-space: pre-wrap; }
+  .a p { margin: 0 0 .8rem; }
+
+  .cite {
+    font-size: .82rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: .05rem .22rem;
+    margin: 0 .02em;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .sources { margin-top: 1rem; padding-top: .7rem; border-top: 1px solid var(--rule); }
+  .sources h3 {
+    font-size: .72rem;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--ink-faint);
+    margin: 0 0 .45rem;
+    font-weight: 600;
+  }
+  .src { font-size: .82rem; color: var(--ink-soft); display: block; margin-bottom: .2rem; }
+  .src .tag {
+    font-size: .68rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--ink-faint);
+    margin-left: .35rem;
+  }
+
+  .trunc {
+    margin-top: .6rem; font-size: .8rem; color: var(--warn-ink);
+    background: var(--warn-bg); padding: .4rem .6rem; border-radius: 8px;
+  }
+  .thinking { color: var(--ink-faint); font-style: italic; }
+  .thinking::after {
+    content: "";
+    animation: dots 1.4s steps(4, end) infinite;
+  }
+  @keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+
+  .err {
+    background: var(--warn-bg);
+    color: var(--warn-ink);
+    padding: .7rem .85rem;
+    border-radius: var(--radius);
+    font-size: .9rem;
+  }
+
+  /* --- composer --- */
+  .composer {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: linear-gradient(to top, var(--paper) 72%, transparent);
+    padding: 1.4rem 1.1rem calc(.9rem + env(safe-area-inset-bottom));
+  }
+  .composer-inner {
+    max-width: 44rem;
+    margin: 0 auto;
+    display: flex;
+    gap: .5rem;
+    align-items: flex-end;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: .4rem .4rem .4rem .2rem;
+  }
+  .composer textarea { border: 0; background: transparent; max-height: 7rem; }
+  .composer button { border-radius: 9px; padding: .55rem .9rem; }
+
+  .hint { text-align: center; font-size: .76rem; color: var(--ink-faint); margin: .5rem 0 0; }
+
+  .starters { display: grid; gap: .5rem; margin-top: .4rem; }
+  .starter {
+    text-align: left;
+    background: var(--card);
+    color: var(--ink-soft);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: .65rem .8rem;
+    font-size: .89rem;
+    font-weight: 400;
+    cursor: pointer;
+  }
+  .starter:hover { border-color: var(--accent); color: var(--ink); }
+
+  .empty { color: var(--ink-soft); font-size: .93rem; }
+
+  .rolebar {
+    display: flex; align-items: center; gap: .5rem;
+    margin-top: .8rem; flex-wrap: wrap;
+  }
+  .badge {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .06em;
+    font-weight: 600; padding: .2rem .5rem; border-radius: 100px;
+    background: var(--accent); color: var(--paper);
+  }
+  .badge.student { background: var(--ink-faint); }
+  .badge.preview { background: var(--warn-ink); }
+  .rolenote { font-size: .8rem; color: var(--ink-faint); }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <h1 id="title">Course Tutor</h1>
+    <p class="sub" id="subtitle">Answers from your teacher's own notes, with the page to read.</p>
+    <div class="topics" id="topics"></div>
+    <div class="rolebar" id="rolebar" hidden>
+      <span class="badge" id="rolebadge"></span>
+      <span class="rolenote" id="rolenote"></span>
+      <button class="ghost" id="viewtoggle" hidden></button>
+    </div>
+  </header>
+
+  <!-- password gate -->
+  <section class="gate" id="gate" hidden>
+    <p id="gatetext">Enter the password your teacher gave the class.</p>
+    <input type="password" id="pw" placeholder="Class password" autocomplete="current-password">
+    <p id="pwerr" class="err" style="margin-top:.7rem" hidden></p>
+    <p><button id="enter" style="margin-top:.7rem">Enter</button></p>
+  </section>
+
+  <!-- conversation -->
+  <main id="main" hidden>
+    <div id="thread"></div>
+
+    <div id="welcome">
+      <p class="empty">Ask anything from the course. Every answer cites the notes it came from, and says so when something isn't covered.</p>
+      <div class="starters" id="starters"></div>
+    </div>
+  </main>
+</div>
+
+<div class="composer" id="composer" hidden>
+  <div class="composer-inner">
+    <textarea id="q" rows="1" placeholder="Ask a question about the course…"></textarea>
+    <button id="send">Ask</button>
+  </div>
+  <p class="hint" id="hint"></p>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let busy = false;
+
+const STARTERS = {
+  student: [
+    "Explain the bacterial growth curve and what the cells are doing in each phase.",
+    "How much should I write for a 4-mark question on the lag phase?",
+    "Why does the Gram stain sometimes give the wrong result on an old culture?"
+  ],
+  teacher: [
+    "Draft four practice questions on bacterial growth, with difficulty ratings and marks.",
+    "How was the growth curve question marked, and where did students lose marks?",
+    "Which past questions test material that is thin in my notes?"
+  ]
+};
+
+let ROLE = "student";
+let VIEWING_AS_STUDENT = false;
+
+/* Escape before inserting any model or server text into the page. */
+function esc(s) {
+  return s.replace(/[&<>"']/g, c => (
+    {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]
+  ));
+}
+
+/* Light formatting, applied only AFTER escaping so it cannot inject HTML:
+   **bold**, then (file.pdf, p. 4) style citations. */
+function format(safe) {
+  return safe
+    .replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>')
+    .replace(
+      /\(([^()]+?\.(?:pdf|md|docx|txt)[^()]*?)\)/gi,
+      '<span class="cite">($1)</span>'
+    );
+}
+
+async function boot() {
+  const cfg = await (await fetch("/api/config")).json();
+
+  $("title").textContent = cfg.course_name + " Tutor";
+  document.title = cfg.course_name + " Tutor";
+
+  $("topics").innerHTML = cfg.topics
+    .map(t => `<span class="chip">${esc(t)}</span>`).join("");
+
+  $("hint").textContent =
+    `Grounded in your teacher's notes · up to ${cfg.questions_per_hour} questions an hour`;
+
+  ROLE = cfg.role || "student";
+  VIEWING_AS_STUDENT = !!cfg.viewing_as_student;
+
+  if (cfg.password_required && !cfg.authenticated) {
+    $("gate").hidden = false;
+    $("pw").focus();
+  } else {
+    open_();
+  }
+}
+
+/* Which starters and badge to show depends on the signed-in role. */
+function renderRole() {
+  const effective = (ROLE === "teacher" && !VIEWING_AS_STUDENT)
+    ? "teacher" : "student";
+
+  $("starters").innerHTML = STARTERS[effective]
+    .map(s => `<button class="starter">${esc(s)}</button>`).join("");
+  document.querySelectorAll(".starter").forEach(b =>
+    b.onclick = () => { $("q").value = b.textContent; send(); }
+  );
+
+  const badge = $("rolebadge"), note = $("rolenote"), toggle = $("viewtoggle");
+  $("rolebar").hidden = false;
+
+  if (ROLE === "teacher" && !VIEWING_AS_STUDENT) {
+    badge.textContent = "Teacher";
+    badge.className = "badge";
+    note.textContent = "Marking schemes and difficulty ratings are available.";
+  } else if (ROLE === "teacher") {
+    badge.textContent = "Previewing as student";
+    badge.className = "badge preview";
+    note.textContent = "This is exactly what your class sees.";
+  } else {
+    badge.textContent = "Student";
+    badge.className = "badge student";
+    note.textContent = "";
+  }
+
+  if (ROLE === "teacher") {
+    toggle.hidden = false;
+    toggle.textContent = VIEWING_AS_STUDENT
+      ? "Back to teacher view" : "Preview as student";
+    toggle.onclick = async () => {
+      toggle.disabled = true;
+      const r = await fetch("/api/view_as", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({as_student: !VIEWING_AS_STUDENT})
+      });
+      const d = await r.json();
+      toggle.disabled = false;
+      if (d.ok) {
+        VIEWING_AS_STUDENT = d.viewing_as_student;
+        $("thread").innerHTML = "";
+        $("welcome").hidden = false;
+        renderRole();
+      }
+    };
+  } else {
+    toggle.hidden = true;
+  }
+}
+
+function open_() {
+  $("gate").hidden = true;
+  $("main").hidden = false;
+  $("composer").hidden = false;
+  renderRole();
+  $("q").focus();
+}
+
+async function login() {
+  const pw = $("pw").value;
+  if (!pw) return;
+  $("enter").disabled = true;
+  const r = await fetch("/api/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({password: pw})
+  });
+  const d = await r.json();
+  $("enter").disabled = false;
+  if (d.ok) { ROLE = d.role || "student"; VIEWING_AS_STUDENT = false; open_(); }
+  else {
+    $("pwerr").textContent = d.error || "Wrong password.";
+    $("pwerr").hidden = false;
+    $("pw").select();
+  }
+}
+
+async function send() {
+  const question = $("q").value.trim();
+  if (!question || busy) return;
+  busy = true;
+  $("send").disabled = true;
+  $("q").value = "";
+  $("q").style.height = "auto";
+  $("welcome").hidden = true;
+
+  const turn = document.createElement("div");
+  turn.className = "turn";
+  turn.innerHTML =
+    `<div class="q">${esc(question)}</div><div class="a thinking"></div>`;
+  $("thread").appendChild(turn);
+  const answer = turn.querySelector(".a");
+  answer.scrollIntoView({behavior: "smooth", block: "start"});
+
+  let raw = "";
+  const finish = () => { busy = false; $("send").disabled = false; $("q").focus(); };
+  const fail = (msg) => {
+    answer.className = "a";
+    answer.innerHTML = `<div class="err">${esc(msg)}</div>`;
+    finish();
+  };
+
+  let res;
+  try {
+    res = await fetch("/api/ask", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({question})
+    });
+  } catch {
+    return fail("Couldn't reach the server. Check your connection.");
+  }
+
+  if (!res.ok) {
+    let msg = "Something went wrong.";
+    try { msg = (await res.json()).error || msg; } catch {}
+    return fail(msg);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const {done, value} = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, {stream: true});
+
+    const blocks = buffer.split("\n\n");
+    buffer = blocks.pop();
+
+    for (const block of blocks) {
+      const ev = (block.match(/^event: (.+)$/m) || [])[1];
+      const dataLine = (block.match(/^data: (.+)$/m) || [])[1];
+      if (!dataLine) continue;
+      let data; try { data = JSON.parse(dataLine); } catch { continue; }
+
+      if (ev === "text") {
+        raw += data.text;
+        answer.className = "a";
+        answer.innerHTML = format(esc(raw));
+      } else if (ev === "error") {
+        return fail(data.error);
+      } else if (ev === "done") {
+        if (data.truncated) {
+          const warn = document.createElement("div");
+          warn.className = "trunc";
+          warn.textContent = "This answer was cut off at the length limit. "
+            + "Ask for a shorter answer, or raise MAX_TOKENS in webapp/.env.";
+          turn.appendChild(warn);
+        }
+        if (data.sources && data.sources.length) {
+          const list = data.sources.map(s =>
+            `<span class="src">${esc(s.citation)}` +
+            (s.kind === "assessment" ? `<span class="tag">past paper</span>` : ``) +
+            `</span>`
+          ).join("");
+          const box = document.createElement("div");
+          box.className = "sources";
+          box.innerHTML = `<h3>From</h3>${list}`;
+          turn.appendChild(box);
+        }
+      }
+    }
+  }
+  finish();
+}
+
+$("enter").onclick = login;
+$("pw").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+$("send").onclick = send;
+
+const box = $("q");
+box.addEventListener("input", () => {
+  box.style.height = "auto";
+  box.style.height = Math.min(box.scrollHeight, 112) + "px";
+});
+box.addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+});
+
+boot();
+</script>
+</body>
+</html>

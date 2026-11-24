@@ -1,0 +1,9 @@
+# Core: the MCP server SDK (includes the `mcp dev` / `mcp install` CLI)
+mcp[cli]>=2.0,<3.0
+
+# Reading course material
+pypdf>=5.0          # PDF lecture notes and past papers
+python-docx>=1.1    # Word documents (optional - remove if you have none)
+
+# Development
+pytest>=8.0

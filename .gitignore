@@ -1,0 +1,27 @@
+# Secrets - never commit these
+.env
+webapp/.env
+*.key
+
+# Student questions - yours to review, not to publish
+question_log.jsonl
+webapp/question_log.jsonl
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Editors / OS
+.DS_Store
+.vscode/
+.idea/
+
+# NOTE on your own course material:
+# The sample course in course/ ships with this repo so it runs out of the box.
+# Keep your REAL notes and past papers outside this folder and point the
+# server at them instead:
+#     export COURSE_DIR=/path/to/your/course
+# That way your material never passes through git at all.
